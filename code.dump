@@ -1,0 +1,329 @@
+/**
+	 * Calculates the piece position of a certain color
+	 * 
+	 * @param board The board
+	 * @param col   The color
+	 * @return The position rating
+	 */
+	public static int calculatePiecePosition(Board board, Color col, boolean isEndgame)
+	{
+		int[][] pawnPositionRating = {
+				{ 0, 0, 0, 0, 0, 0, 0, 0 }, 
+				{ 50, 50, 50, 50, 50, 50, 50, 50 },
+				{ 10, 10, 20, 30, 30, 20, 10, 10 },
+				{ 5, 5, 10, 25, 25, 10, 5, 5 },
+				{ 0, 0, 0, 20, 20, 0, 0, 0 },
+				{ 5, -5, -10, 0, 0, -10, -5, 5 },
+				{ 5, 10, 10, -20, -20, 10, 10, 5 },
+				{ 0, 0, 0, 0, 0, 0, 0, 0 }
+		};
+		int[][] knightPositionRating = {
+				{ -50, -40, -30, -30, -30, -30, -40, -50 },
+				{ -40, -20, 0, 0, 0, 0, -20, -40 },
+				{ -30, 0, 10, 15, 15, 10, 0, -30 },
+				{ -30, 5, 15, 20, 20, 15, 5, -30 },
+				{ -30, 0, 15, 20, 20, 15, 0, -30 },
+				{ -30, 5, 10, 15, 15, 10, 5, -30 },
+				{ -40, -20, 0, 5, 5, 0, -20, -40 },
+				{ -50, -40, -30, -30, -30, -30, -40, -50 }
+		};
+		int[][] bishopPositionRating = {
+				{ -20, -10, -10, -10, -10, -10, -10, -20 },
+				{ -10, 0, 0, 0, 0, 0, 0, -10 },
+				{ -10, 0, 5, 10, 10, 5, 0, -10 },
+				{ -10, 5, 5, 10, 10, 5, 5, -10 },
+				{ -10, 0, 10, 10, 10, 10, 0, -10 },
+				{ -10, 10, 10, 10, 10, 10, 10, -10 },
+				{ -10, 5, 0, 0, 0, 0, 5, -10 },
+				{ -20, -10, -10, -10, -10, -10, -10, -20 }
+		};
+		int[][] rookPositionRating = {
+				{ 0, 0, 0, 0, 0, 0, 0, 0 },
+				{ 5, 10, 10, 10, 10, 10, 10, 5 },
+				{ -5, 0, 0, 0, 0, 0, 0, -5 },
+				{ -5, 0, 0, 0, 0, 0, 0, -5 },
+				{ -5, 0, 0, 0, 0, 0, 0, -5 },
+				{ -5, 0, 0, 0, 0, 0, 0, -5 },
+				{ -5, 0, 0, 0, 0, 0, 0, -5 },
+				{ 0, 0, 0, 5, 5, 0, 0, 0 }
+		};
+		int[][] queenPositionRating = {
+				{ -20, -10, -10, -5, -5, -10, -10, -20 },
+				{ -10, 0, 0, 0, 0, 0, 0, -10, },
+				{ -10, 0, 5, 5, 5, 5, 0, -10 },
+				{ -5, 0, 5, 5, 5, 5, 0, -5 },
+				{ 0, 0, 5, 5, 5, 5, 0, -5 },
+				{ -10, 5, 5, 5, 5, 5, 0, -10 },
+				{ -10, 0, 5, 0, 0, 0, 0, -10 },
+				{ -20, -10, -10, -5, -5, -10, -10, -20 }
+		};
+		int[][] kingPositionRatingMiddle = {
+				{ -30, -40, -40, -50, -50, -40, -40, -30 },
+				{ -30, -40, -40, -50, -50, -40, -40, -30 },
+				{ -30, -40, -40, -50, -50, -40, -40, -30 },
+				{ -30, -40, -40, -50, -50, -40, -40, -30 },
+				{ -20, -30, -30, -40, -40, -30, -30, -20 },
+				{ -10, -20, -20, -20, -20, -20, -20, -10 },
+				{ 20, 20, 0, 0, 0, 0, 20, 20 },
+				{ 20, 30, 10, 0, 0, 10, 30, 20 }
+		};
+		int[][] kingPositionRatingEnd = {
+				{ -50, -40, -30, -20, -20, -30, -40, -50 },
+				{ -30, -20, -10, 0, 0, -10, -20, -30 },
+				{ -30, -10, 20, 30, 30, 20, -10, -30 },
+				{ -30, -10, 30, 40, 40, 30, -10, -30 },
+				{ -30, -10, 30, 40, 40, 30, -10, -30 },
+				{ -30, -10, 20, 30, 30, 20, -10, -30 },
+				{ -30, -30, 0, 0, 0, 0, -30, -30 },
+				{-50, -30, -30, -30, -30, -30, -30, -50 }
+		};
+
+		int rating = 0;
+		for (Location l : board.getOccupiedLocations())
+		{
+			Piece p = board.get(l);
+
+			if (p.getColor().equals(col))
+			{
+				int r = p.getColor().equals(Game.nearColor) ? l.getRow() : 7 - l.getRow();
+				int c = l.getCol();
+
+				// Pawn
+				if (p instanceof Pawn)
+				{
+					rating += pawnPositionRating[r][c];
+				}
+				// Knight
+				if (p instanceof Knight)
+				{
+					rating += knightPositionRating[r][c];
+				}
+				// Bishop
+				if (p instanceof Bishop)
+				{
+					rating += bishopPositionRating[r][c];
+				}
+				// Rook
+				if (p instanceof Rook)
+				{
+					rating += rookPositionRating[r][c];
+				}
+				// Queen
+				if (p instanceof Queen)
+				{
+					rating += queenPositionRating[r][c];
+				}
+				// King
+				if (p instanceof King)
+				{
+					if (isEndgame)
+					{
+						rating += kingPositionRatingEnd[r][c];
+					}
+					else
+					{
+						rating += kingPositionRatingMiddle[r][c];
+					}
+
+				}
+			}
+		}
+		return rating;
+	}
+	
+	
+	
+	
+	
+	
+	private int quiescence(int alpha, int beta, int color, int depth, int maxDepth, Move previousMove) throws IOException
+	{
+		Board board = getBoard();
+		int plysLeft = maxDepth - depth;
+		Color pieceColor = color == 1 ? Color.WHITE : Color.BLACK;
+		boolean inCheck = board.getKing(pieceColor).inCheck();
+		
+		q_nodes++;
+		
+		//Stand pat
+		int absoluteEval = Evaluation.evaluate(board).value;
+		
+		int evalScore = absoluteEval * color;
+		
+		boolean ableDeltaPrune = !inCheck;
+		
+		//Don't use stand pat as lower bound if in check (special case)
+		if (!inCheck) {
+					
+			/* If rating >= beta, then opponent (parent) already has a move
+			 * that favors them more than this path, so break
+			 */
+			
+			if (evalScore >= beta) {
+				return evalScore;
+			}
+		
+			if (alpha < evalScore) {
+				alpha = evalScore;
+			}
+		}
+		
+		//Delta Pruning
+		if (ableDeltaPrune && evalScore + QUIESCENCE_PRUNING_BIG_DELTA < alpha)
+		{
+			return alpha;
+		}
+		
+		/*
+		 * Probe the state table (transposition table)
+		 * 
+		 * TT still works in quiescence search because maxDepth - depth always <= 0, so 
+		 * quiescence saved states will always be distinct from main states (main TT won't
+		 * use these values because table_info.depth will always be >= maxDepth-depth
+		 * 
+		 * TT values from main search are useable by quiescence search because those main
+		 * values are always sourced from quiescence search results, so in fact, they're actually
+		 * more accurate to use than bare quiescence searching (they include the main search
+		 *  + an entire quiescence search)
+		 */
+		
+		String compressedState = Compression.compressState(board, color);
+		
+		CompressionInfo table_info = retrieveEvaluation(compressedState);
+		if (table_info != null && table_info.depth >= plysLeft)
+		{
+			//PV Node (Exact)
+			if (table_info.nodeType == 1) {
+				nodesProcessedByTT++;
+				return table_info.score;
+			}
+			//Upper Bound (<= alpha)
+			if (table_info.nodeType == 2) {
+				if (table_info.score <= alpha) {
+					nodesProcessedByTT++;
+					return table_info.score;
+				}
+			}
+			//Lower Bound (>= beta)
+			if (table_info.nodeType == 3) {
+				if (table_info.score >= beta) {
+					nodesProcessedByTT++;
+					return table_info.score;
+				}
+			}
+		}
+		
+		ArrayList<Move> moves = board.allMoves(pieceColor);
+		
+		// Sort the moves by best depth 1 evaluation score
+		sortMoves(moves, previousMove);
+		
+		int value = evalScore;
+		int originalAlpha = alpha;
+		// Searches through all captures
+		for (Move m: moves) {
+			/*
+			 * Ignore non-capture, quiet moves (unless in check or if move checks)
+			 */
+			
+			if (!inCheck) {
+				if (m.getVictim() == null) {
+					/*
+					 * Normal case, hit a quiet position (capture moves raised alpha)
+					 */
+					if (value > originalAlpha) {
+						break;
+					}
+					
+					/*
+					 * Means that it's the special case where search tries checking moves
+					 * when capture moves futile (skips over if deep depths)
+					 */
+					else {
+						//If depth too great or no more checks, break
+						if (depth > 2) {
+							break;
+						}
+						if (!board.deliversCheck(m)) {
+							continue;
+						}
+					}
+				}
+			}
+			//Delta Pruning for a capture move
+			if (m.getVictim() != null)
+			{
+				//Check additional delta pruning (move-specific)
+				if (ableDeltaPrune && evalScore + Evaluation.SEE(board, m) + QUIESCENCE_PRUNING_MARGIN_DELTA < alpha)
+				{
+					continue;
+				}
+			}
+			
+			board.executeMove(m);
+			value = Math.max(value,-quiescence(-beta, -alpha, -color, depth+1, maxDepth, m));
+			board.undoMove(m);
+			
+			if (value > alpha)
+			{
+				alpha = value;
+				
+				//Beta cutoff
+				if (alpha >= beta) {
+					updateCounterTable(m, previousMove);
+					break;
+				}
+			}
+		}
+				
+		//TT Store
+		if (value <= originalAlpha) {
+			//Fail-low (<= alpha)
+			Compression.addToTable(compressedState, 2, plysLeft, value);
+		}
+		else if (value >= beta) {
+			//Fail-high (alpha-beta cutoff, >= beta)
+			Compression.addToTable(compressedState, 3, plysLeft, value);
+		}
+		else {
+			//Exact score: alpha < score < beta
+			Compression.addToTable(compressedState, 1, plysLeft, value);
+		}
+		
+		return value;
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	if (!inCheck) {
+				if (m.getVictim() == null) {
+					/*
+					 * Normal case, hit a quiet position (capture moves raised alpha)
+					 * Breaks because further moves are either quiet or bad captures
+					 */
+					if (value > originalAlpha) {
+						break;
+					}
+					
+					/*
+					 * Means that it's the special case where search tries checking moves
+					 * when capture moves futile (skips over if deep depths)
+					 */
+					else {
+						//If depth too great or no more checks, break
+						if (plysLeft < -2) {
+							break;
+						}
+						if (!board.deliversCheck(m)) {
+							continue;
+						}
+					}
+				}
+			}
